@@ -13,16 +13,42 @@ GNU General Public License for more details.
 You should have received a copy of the GNU General Public License
 along with Cayenne.  If not, see <http://www.gnu.org/licenses/>. */
 
+#include <pthread.h>
+#include <stdbool.h>
 #include <stdio.h>
 #include <stdlib.h>
-#include <pthread.h>
+
+#include "mpsc_queue.h"
+
+struct Instruction;
+typedef struct Instruction Instruction;
+struct Instruction
+{
+  int placeHolder;
+};
+
+struct Environment;
+typedef struct Environment Environment;
+struct Environment
+{
+  int placeHolder;
+};
+
+struct GreenThread;
+typedef struct GreenThread GreenThread;
+struct GreenThread
+{
+  bool running;
+  Instruction* instructionPointer;
+  MPSCQueue* messageQueue;
+  Environment* environment;
+};
 
 #define PTHREAD_COUNT 10
 
 void* driverLoop(void* arg)
 {
-  int threadId;
-  threadId = *((int*) arg);
+  int threadId = *((int*) arg);
   printf("Greetings from thread %d!\n", threadId);
   return NULL;
 }
