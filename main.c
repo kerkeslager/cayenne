@@ -18,31 +18,7 @@ along with Cayenne.  If not, see <http://www.gnu.org/licenses/>. */
 #include <stdio.h>
 #include <stdlib.h>
 
-#include "mpsc_queue.h"
-
-struct Instruction;
-typedef struct Instruction Instruction;
-struct Instruction
-{
-  int placeHolder;
-};
-
-struct Environment;
-typedef struct Environment Environment;
-struct Environment
-{
-  int placeHolder;
-};
-
-struct GreenThread;
-typedef struct GreenThread GreenThread;
-struct GreenThread
-{
-  bool running;
-  Instruction* instructionPointer;
-  MPSCQueue* messageQueue;
-  Environment* environment;
-};
+#include "green_thread.h"
 
 #define PTHREAD_COUNT 10
 
