@@ -1,1 +1,1 @@
-gcc -pthread -o cayenne main.c
+gcc -Wall -Wpedantic -Wextra -pthread -o cayenne main.c
