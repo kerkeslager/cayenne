@@ -19,6 +19,9 @@ along with Cayenne.  If not, see <http://www.gnu.org/licenses/>. */
 #include "environment.h"
 #include "instruction.h"
 #include "mpsc_queue.h"
+#include "stack.h"
+
+#include <stdlib.h>
 
 struct GreenThread;
 typedef struct GreenThread GreenThread;
@@ -27,7 +30,25 @@ struct GreenThread
   bool running;
   Instruction* currentInstruction;
   MPSCQueue* messageQueue;
-  Environment* environment;
+  DataStack dataStack;
+  ReturnStack returnStack;
 };
+
+void GreenThread_executeInstruction(GreenThread* self)
+{
+  switch(self->currentInstruction->opcode)
+  {
+    case OPCODE_NOOP:
+      break;
+
+    case OPCODE_DROP:
+      DataStack_pop(&(self->dataStack));
+      break;
+
+    default:
+      fprintf(stderr, "Invalid opcode %i.\n", self->currentInstruction->opcode);
+      exit(1);
+  }
+}
 
 #endif

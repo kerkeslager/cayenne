@@ -16,11 +16,16 @@ along with Cayenne.  If not, see <http://www.gnu.org/licenses/>. */
 #ifndef INSTRUCTION_H
 #define INSTRUCTION_H
 
+#include <stdint.h>
+
 struct Instruction;
 typedef struct Instruction Instruction;
 struct Instruction
 {
-  int placeHolder;
+  uint8_t opcode;
 };
+
+#define OPCODE_NOOP 0x00
+#define OPCODE_DROP 0x01
 
 #endif
