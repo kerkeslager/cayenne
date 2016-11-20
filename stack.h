@@ -17,6 +17,7 @@ along with Cayenne.  If not, see <http://www.gnu.org/licenses/>. */
 #define STACK_H
 
 #include "instruction.h"
+#include "object.h"
 
 #include <stdlib.h>
 
@@ -56,7 +57,7 @@ typedef struct DataStack DataStack;
 struct ReturnStack;
 typedef struct ReturnStack ReturnStack;
 
-Stack(DataStack, void*)
+Stack(DataStack, Object*)
 Stack(ReturnStack, Instruction*)
 
 #undef Stack
