@@ -18,11 +18,13 @@ along with Cayenne.  If not, see <http://www.gnu.org/licenses/>. */
 
 #include <stdint.h>
 
+typedef uint8_t Opcode;
+
 struct Instruction;
 typedef struct Instruction Instruction;
 struct Instruction
 {
-  uint8_t opcode;
+  Opcode opcode;
 };
 
 #define OPCODE_NOOP 0x00

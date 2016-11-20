@@ -36,7 +36,9 @@ struct GreenThread
 
 void GreenThread_executeInstruction(GreenThread* self)
 {
-  switch(self->currentInstruction->opcode)
+  Opcode opcode = self->currentInstruction->opcode;
+
+  switch(opcode)
   {
     case OPCODE_NOOP:
       break;
@@ -46,7 +48,7 @@ void GreenThread_executeInstruction(GreenThread* self)
       break;
 
     default:
-      fprintf(stderr, "Invalid opcode %i.\n", self->currentInstruction->opcode);
+      fprintf(stderr, "Invalid opcode %i.\n", opcode);
       exit(1);
   }
 }
