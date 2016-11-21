@@ -44,9 +44,32 @@ void GreenThread_initialize(GreenThread* self)
   Environment_initialize(&(self->environment));
 }
 
-void GreenThread_executeInstruction(GreenThread* self)
+void GreenThread_executeSwap(GreenThread* self)
 {
-  Opcode opcode = self->currentInstruction->opcode;
+  DataStack* dataStack = &(self->dataStack);
+  Object* a = DataStack_pop(dataStack);
+  Object* b = DataStack_pop(dataStack);
+  DataStack_push(dataStack, a);
+  DataStack_push(dataStack, b);
+}
+
+void GreenThread_executeLoad(GreenThread* self, Symbol* symbol)
+{
+  DataStack* dataStack = &(self->dataStack);
+  Environment* environment = &(self->environment);
+  DataStack_push(dataStack, Environment_get(environment, symbol));
+}
+
+void GreenThread_executeStore(GreenThread* self, Symbol* symbol)
+{
+  DataStack* dataStack = &(self->dataStack);
+  Environment* environment = &(self->environment);
+  Environment_set(environment, symbol, DataStack_pop(dataStack));
+}
+
+void GreenThread_executeInstruction(GreenThread* self, Instruction* instruction)
+{
+  Opcode opcode = instruction->opcode;
 
   switch(opcode)
   {
@@ -58,38 +81,26 @@ void GreenThread_executeInstruction(GreenThread* self)
       break;
 
     case OPCODE_SWAP:
-      {
-        DataStack* dataStack = &(self->dataStack);
-        Object* a = DataStack_pop(dataStack);
-        Object* b = DataStack_pop(dataStack);
-        DataStack_push(dataStack, a);
-        DataStack_push(dataStack, b);
-      }
+      GreenThread_executeSwap(self);
       break;
 
     case OPCODE_LOAD:
-      {
-        DataStack* dataStack = &(self->dataStack);
-        Environment* environment = &(self->environment);
-        Symbol* symbol = self->currentInstruction->symbol;
-        DataStack_push(dataStack, Environment_get(environment, symbol));
-      }
+      GreenThread_executeLoad(self, instruction->symbol);
       break;
 
     case OPCODE_STORE:
-      {
-        DataStack* dataStack = &(self->dataStack);
-        Environment* environment = &(self->environment);
-        Symbol* symbol = self->currentInstruction->symbol;
-        Environment_set(environment, symbol, DataStack_pop(dataStack));
-      }
+      GreenThread_executeStore(self, instruction->symbol);
       break;
 
     default:
       fprintf(stderr, "Invalid opcode %i.\n", opcode);
       exit(1);
   }
+}
 
+void GreenThread_executeCurrentInstruction(GreenThread* self)
+{
+  GreenThread_executeInstruction(self, self->currentInstruction);
   self->currentInstruction++;
 }
 
