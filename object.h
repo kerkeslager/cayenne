@@ -18,6 +18,7 @@ along with Cayenne.  If not, see <http://www.gnu.org/licenses/>. */
 
 #include <stdbool.h>
 #include <stdint.h>
+#include <stdlib.h>
 
 enum Type
 {
@@ -38,8 +39,34 @@ struct Object;
 typedef struct Object Object;
 struct Object
 {
+  size_t referenceCount;
   Type type;
   Instance instance;
 };
+
+Object* Object_create(Type type, Instance instance)
+{
+  Object* result = malloc(sizeof(Object));
+  result->referenceCount = 1;
+  result->type = type;
+  result->instance = instance;
+  return result;
+}
+
+Object* Object_reference(Object* o)
+{
+  (o->referenceCount)++;
+  return o;
+}
+
+void Object_dereference(Object* o)
+{
+  (o->referenceCount)--;
+
+  if(o->referenceCount == 0)
+  {
+    free(o);
+  }
+}
 
 #endif
