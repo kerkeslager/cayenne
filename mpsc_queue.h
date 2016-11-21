@@ -37,14 +37,14 @@ struct MPSCQueueNode
   MPSCQueueNode* next;
 };
 
-void initMPSCQueue(MPSCQueue* queue)
+void MPSCQueue_initialize(MPSCQueue* self)
 {
   MPSCQueueNode* fake = malloc(sizeof(MPSCQueueNode));
 
   fake->next = NULL;
 
-  queue->head = fake;
-  queue->tail = fake;
+  self->head = fake;
+  self->tail = fake;
 }
 
 void enqueue(MPSCQueue* queue, void* item)

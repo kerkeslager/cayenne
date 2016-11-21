@@ -18,16 +18,23 @@ along with Cayenne.  If not, see <http://www.gnu.org/licenses/>. */
 
 #include <stdint.h>
 
-typedef uint8_t Opcode;
+enum Opcode
+{
+  OPCODE_NOOP,
+  OPCODE_DROP,
+  OPCODE_SWAP,
+  OPCODE_LOAD,
+  OPCODE_STORE
+};
+typedef enum Opcode Opcode;
 
 struct Instruction;
 typedef struct Instruction Instruction;
 struct Instruction
 {
   Opcode opcode;
+  Symbol* symbol;
 };
 
-#define OPCODE_NOOP 0x00
-#define OPCODE_DROP 0x01
 
 #endif

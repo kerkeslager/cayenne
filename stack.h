@@ -35,6 +35,11 @@ along with Cayenne.  If not, see <http://www.gnu.org/licenses/>. */
     stackType##Frame* top;                                    \
   };                                                          \
                                                               \
+  void stackType##_initialize(stackType* s)                   \
+  {                                                           \
+    s->top = NULL;                                            \
+  }                                                           \
+                                                              \
   void stackType##_push(stackType* self, itemType item)       \
   {                                                           \
     stackType##Frame* top = malloc(sizeof(stackType##Frame)); \

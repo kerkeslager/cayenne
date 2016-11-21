@@ -46,10 +46,15 @@ struct Environment
   EnvironmentFrame* first;
 };
 
+void Environment_initialize(Environment* e)
+{
+  e->first = NULL;
+}
+
 Environment* Environment_create()
 {
   Environment* result = malloc(sizeof(Environment));
-  result->first = NULL;
+  Environment_initialize(result);
   return result;
 }
 

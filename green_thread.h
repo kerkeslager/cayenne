@@ -29,10 +29,20 @@ struct GreenThread
 {
   bool running;
   Instruction* currentInstruction;
-  MPSCQueue* messageQueue;
+  MPSCQueue messageQueue;
   DataStack dataStack;
   ReturnStack returnStack;
+  Environment environment;
 };
+
+void GreenThread_initialize(GreenThread* self)
+{
+  self->running = false;
+  MPSCQueue_initialize(&(self->messageQueue));
+  DataStack_initialize(&(self->dataStack));
+  ReturnStack_initialize(&(self->returnStack));
+  Environment_initialize(&(self->environment));
+}
 
 void GreenThread_executeInstruction(GreenThread* self)
 {
@@ -47,10 +57,40 @@ void GreenThread_executeInstruction(GreenThread* self)
       DataStack_pop(&(self->dataStack));
       break;
 
+    case OPCODE_SWAP:
+      {
+        DataStack* dataStack = &(self->dataStack);
+        Object* a = DataStack_pop(dataStack);
+        Object* b = DataStack_pop(dataStack);
+        DataStack_push(dataStack, a);
+        DataStack_push(dataStack, b);
+      }
+      break;
+
+    case OPCODE_LOAD:
+      {
+        DataStack* dataStack = &(self->dataStack);
+        Environment* environment = &(self->environment);
+        Symbol* symbol = self->currentInstruction->symbol;
+        DataStack_push(dataStack, Environment_get(environment, symbol));
+      }
+      break;
+
+    case OPCODE_STORE:
+      {
+        DataStack* dataStack = &(self->dataStack);
+        Environment* environment = &(self->environment);
+        Symbol* symbol = self->currentInstruction->symbol;
+        Environment_set(environment, symbol, DataStack_pop(dataStack));
+      }
+      break;
+
     default:
       fprintf(stderr, "Invalid opcode %i.\n", opcode);
       exit(1);
   }
+
+  self->currentInstruction++;
 }
 
 #endif
