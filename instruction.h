@@ -16,6 +16,8 @@ along with Cayenne.  If not, see <http://www.gnu.org/licenses/>. */
 #ifndef INSTRUCTION_H
 #define INSTRUCTION_H
 
+#include "symbol.h"
+
 #include <stdint.h>
 
 enum Opcode
@@ -24,7 +26,12 @@ enum Opcode
   OPCODE_DROP,
   OPCODE_SWAP,
   OPCODE_LOAD,
-  OPCODE_STORE
+  OPCODE_STORE,
+  OPCODE_CALL,
+  OPCODE_RETURN,
+  // OPCODE_SEND,
+  OPCODE_RECEIVE// ,
+  // OPCODE_TAILCALL
 };
 typedef enum Opcode Opcode;
 

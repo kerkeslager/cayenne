@@ -16,6 +16,8 @@ along with Cayenne.  If not, see <http://www.gnu.org/licenses/>. */
 #ifndef OBJECT_H
 #define OBJECT_H
 
+#include "instruction.h"
+
 #include <stdbool.h>
 #include <stdint.h>
 #include <stdlib.h>
@@ -23,6 +25,7 @@ along with Cayenne.  If not, see <http://www.gnu.org/licenses/>. */
 enum Type
 {
   TYPE_BOOLEAN,
+  TYPE_CLOSURE,
   TYPE_INTEGER
 };
 typedef enum Type Type;
@@ -32,6 +35,7 @@ typedef union Instance Instance;
 union Instance
 {
   bool boolean;
+  Instruction* closure;
   int32_t integer;
 };
 

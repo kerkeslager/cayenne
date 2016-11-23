@@ -67,7 +67,44 @@ void GreenThread_executeStore(GreenThread* self, Symbol* symbol)
   Environment_set(environment, symbol, DataStack_pop(dataStack));
 }
 
-void GreenThread_executeInstruction(GreenThread* self, Instruction* instruction)
+void GreenThread_executeCall(GreenThread* self, Symbol* symbol)
+{
+  ReturnStack* returnStack = &(self->returnStack);
+  ReturnStack_push(returnStack, self->currentInstruction);
+
+  Environment* environment = &(self->environment);
+  // TODO Implement a full closure
+  Object* instructionObject = Environment_get(environment, symbol);
+  assert(instructionObject->type == TYPE_CLOSURE);
+  Instruction* instruction = instructionObject->instance.closure;
+  self->currentInstruction = instruction;
+}
+
+void GreenThread_executeReturn(GreenThread* self)
+{
+  ReturnStack* returnStack = &(self->returnStack);
+  self->currentInstruction = ReturnStack_pop(returnStack);
+}
+
+bool GreenThread_executeReceive(GreenThread* self)
+{
+  MPSCQueue* messageQueue = &(self->messageQueue);
+
+  if(MPSCQueue_isEmpty(messageQueue))
+  {
+    // TODO Check the reference count of the thread and collect it if it's 0
+    // If there are no references to the thread and the message queue is empty it will never progress
+    return false;
+  }
+
+  DataStack* dataStack = &(self->dataStack);
+
+  DataStack_push(dataStack, MPSCQueue_dequeue(messageQueue));
+
+  return true;
+}
+
+bool GreenThread_executeInstruction(GreenThread* self, Instruction* instruction)
 {
   Opcode opcode = instruction->opcode;
 
@@ -92,16 +129,31 @@ void GreenThread_executeInstruction(GreenThread* self, Instruction* instruction)
       GreenThread_executeStore(self, instruction->symbol);
       break;
 
+    case OPCODE_CALL:
+      GreenThread_executeCall(self, instruction->symbol);
+      break;
+
+    case OPCODE_RETURN:
+      GreenThread_executeReturn(self);
+      break;
+
+    case OPCODE_RECEIVE:
+      return GreenThread_executeReceive(self);
+
     default:
       fprintf(stderr, "Invalid opcode %i.\n", opcode);
       exit(1);
   }
+
+  return true;
 }
 
 void GreenThread_executeCurrentInstruction(GreenThread* self)
 {
-  GreenThread_executeInstruction(self, self->currentInstruction);
-  self->currentInstruction++;
+  if(GreenThread_executeInstruction(self, self->currentInstruction))
+  {
+    self->currentInstruction++;
+  }
 }
 
 #endif

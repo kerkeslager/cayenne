@@ -16,7 +16,10 @@ along with Cayenne.  If not, see <http://www.gnu.org/licenses/>. */
 #ifndef MPSC_QUEUE_H
 #define MPSC_QUEUE_H
 
+#include "object.h"
+
 #include <assert.h>
+#include <stdbool.h>
 #include <stdlib.h>
 
 struct MPSCQueue;
@@ -33,7 +36,7 @@ struct MPSCQueue
 
 struct MPSCQueueNode
 {
-  void* item;
+  Object* item;
   MPSCQueueNode* next;
 };
 
@@ -47,7 +50,7 @@ void MPSCQueue_initialize(MPSCQueue* self)
   self->tail = fake;
 }
 
-void enqueue(MPSCQueue* queue, void* item)
+void MPSCQueue_enqueue(MPSCQueue* queue, Object* item)
 {
   // Create the node
   MPSCQueueNode* node = malloc(sizeof(MPSCQueueNode));
@@ -64,10 +67,14 @@ void enqueue(MPSCQueue* queue, void* item)
   }
 }
 
-void* dequeue(MPSCQueue* queue, void* defaultResult)
+bool MPSCQueue_isEmpty(MPSCQueue* self)
 {
-  if(queue->head == queue->tail) return defaultResult;
+  return self->head == self->tail;
+}
 
+Object* MPSCQueue_dequeue(MPSCQueue* queue)
+{
+  assert(!MPSCQueue_isEmpty(queue));
   assert(queue->head->next != NULL);
 
   MPSCQueueNode* previous = queue->head;
