@@ -49,7 +49,7 @@ void startPThreads()
   }
 }
 
-int main(int argc, char** argv)
+int main()
 {
   startPThreads();
   return 0;
