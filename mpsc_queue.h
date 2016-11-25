@@ -57,12 +57,26 @@ void MPSCQueue_enqueue(MPSCQueue* queue, Object* item)
   node->item = item;
   node->next = NULL;
 
-  // Append the node
+  // Append the node to the linked list, but the tail isn't updated yet
   while(!__sync_bool_compare_and_swap(&(queue->tail->next), NULL, node));
 
-  // Reuse the node variable to update the tail
+  /* Reuse the node variable to update the tail. Note that the algorithm used
+  has some implications:
+  1.  Any producer thread can update the tail, and there's no guarantee it will
+      be this thread that updates the tail. This thread will be blocked on this
+      loop until the tail is updated such that queue->tail->next == NULL (this
+      means the tail has been updated to include the added node for every
+      producer that has added a node).
+  2.  Since the queue is considered empty when head == tail, if the queue was
+      previously empty, the consumer will be blocked until the tail updates.
+  3.  Since all the producers are racing to advance the tail as far as
+      possible, the tail will likely be advanced to the end (unblocking the
+      producers, and even more likely to advance one node (unblocking the 
+      consumer). */
   while((node = queue->tail)->next != NULL)
   {
+    /* TODO Is it a problem that node may have been freed by the consumer?
+    Very unlikely but still... */
     __sync_bool_compare_and_swap(&(queue->tail), node, node->next);
   }
 }
