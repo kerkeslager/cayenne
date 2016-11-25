@@ -71,6 +71,7 @@ bool MPMCQueue_isEmpty(MPMCQueue* self)
 GreenThread* MPMCQueue_dequeue(MPMCQueue* self)
 {
   MPMCQueueNode* previous;
+  GreenThread* result;
 
   do
   {
@@ -79,10 +80,13 @@ GreenThread* MPMCQueue_dequeue(MPMCQueue* self)
     {
       pthread_yield();
     }
+
+    /* This can't be done outside the loop, because another thread might free
+    previous->next before this thread gets there. */
+    result = previous->next->item;
   }
   while(!__sync_bool_compare_and_swap(&(queue->head), previous, previous->next));
 
-  GreenThread* item = previous->next->item;
   free(previous);
   return item;
 }
