@@ -56,14 +56,36 @@ struct Program
 
 #define PTHREAD_COUNT 10
 
+void Program_incrementRunningThreadCount(Program* self)
+{
+  size_t old;
+
+  do
+  {
+    old = self->runningThreadCount;
+  }
+  while(!__sync_bool_compare_and_swap(&(self->runningThreadCount), old, old + 1));
+}
+
+void Program_decrementRunningThreadCount(Program* self)
+{
+  size_t old;
+
+  do
+  {
+    old = self->runningThreadCount;
+  }
+  while(!__sync_bool_compare_and_swap(&(self->runningThreadCount), old, old - 1));
+}
+
 void* driverLoop(void* arg)
 {
-  Program* program = (Program*) arg;
+  Program* self = (Program*) arg;
 
-  MPMCQueue* threadQueue = &(program->threadQueue);
+  MPMCQueue* threadQueue = &(self->threadQueue);
 
   /* TODO Figure out how to detect receiving thread cycles. */
-  while(program->runningThreadCount > 0)
+  while(self->runningThreadCount > 0)
   {
     GreenThread* thread = MPMCQueue_dequeue(threadQueue);
 
@@ -78,18 +100,7 @@ void* driverLoop(void* arg)
     if(result.halt)
     {
       GreenThread_destroy(thread);
-      size_t oldRunningThreadCount;
-
-      do
-      {
-        oldRunningThreadCount = program->runningThreadCount;
-      } while(
-        !__sync_bool_compare_and_swap(
-          &(program->runningThreadCount),
-          oldRunningThreadCount,
-          oldRunningThreadCount - 1
-        )
-      );
+      Program_decrementRunningThreadCount(self);
     }
 
     else
