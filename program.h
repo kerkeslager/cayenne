@@ -89,6 +89,7 @@ void* driverLoop(void* arg)
   {
     GreenThread* thread = MPMCQueue_dequeue(threadQueue);
 
+    /* MPMCQueue_dequeue returns NULL if the queue is empty. */
     if(thread == NULL)
     {
       pthread_yield();

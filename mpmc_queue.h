@@ -100,7 +100,7 @@ GreenThread* MPMCQueue_dequeue(MPMCQueue* self)
     if(MPMCQueue_isEmpty(self)) return NULL;
 
     /* This can't be done outside the loop, because another consumer might free
-    previous before this thread gets there. */
+    previous (which is previous->next for this thread) before this thread gets there. */
     result = previous->next->item;
 
     /* TODO Is it a problem that previous may have been freed by another consumer? */
