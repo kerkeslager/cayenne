@@ -45,11 +45,10 @@ void GreenThread_initialize(GreenThread* self, Instruction* start)
 
 void GreenThread_destroy(GreenThread* self)
 {
-  // TODO Implement this
-  //MPSCQueue_destroy(&(self->messageQueue));
+  MPSCQueue_destroy(&(self->messageQueue));
   DataStack_destroy(&(self->dataStack));
   ReturnStack_destroy(&(self->returnStack));
-  //Environment_destroy(&(self->environment));
+  Environment_destroy(&(self->environment));
 }
 
 void GreenThread_executeSwap(GreenThread* self)

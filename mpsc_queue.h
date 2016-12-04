@@ -97,10 +97,9 @@ Object* MPSCQueue_dequeue(MPSCQueue* queue)
   return queue->head->item;
 }
 
-void freeMPSCQueue(MPSCQueue* queue)
+void MPSCQueue_destroy(MPSCQueue* self)
 {
-  MPSCQueueNode* node = queue->head;
-  free(queue);
+  MPSCQueueNode* node = self->head;
 
   while(node != NULL)
   {

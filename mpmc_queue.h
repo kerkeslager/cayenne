@@ -111,4 +111,16 @@ GreenThread* MPMCQueue_dequeue(MPMCQueue* self)
   return result;
 }
 
+void MPMCQueue_destroy(MPMCQueue* self)
+{
+  MPMCQueueNode* node = self->head;
+
+  while(node != NULL)
+  {
+    MPMCQueueNode* temp = node;
+    node = temp->next;
+    free(temp);
+  }
+}
+
 #endif

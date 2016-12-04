@@ -68,8 +68,6 @@ void Environment_destroy(Environment* e)
     current = current->next;
     free(previous);
   }
-
-  free(e);
 }
 
 Object* Environment_get(Environment* self, Symbol* key)
