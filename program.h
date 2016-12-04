@@ -69,8 +69,17 @@ void* driverLoop(void* arg)
     never. Figure out how to check threadCount before yielding in the
     dequeue. */
     GreenThread* thread = MPMCQueue_dequeue(threadQueue);
-    GreenThread_executeCurrentInstruction(thread);
-    MPMCQueue_enqueue(threadQueue, thread);
+    InstructionResult result = GreenThread_executeCurrentInstruction(thread);
+
+    if(result.reenqueue)
+    {
+      MPMCQueue_enqueue(threadQueue, thread);
+    }
+
+    else
+    {
+      // TODO Dereference the GreenThread
+    }
   }
 
   return NULL;

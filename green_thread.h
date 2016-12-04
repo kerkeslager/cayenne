@@ -103,64 +103,78 @@ bool GreenThread_executeReceive(GreenThread* self)
   return true;
 }
 
-bool GreenThread_executeInstruction(GreenThread* self, Instruction* instruction)
+struct InstructionResult;
+typedef struct InstructionResult InstructionResult;
+struct InstructionResult
+{
+  bool reenqueue;
+  bool increment;
+};
+
+InstructionResult GreenThread_executeInstruction(GreenThread* self, Instruction* instruction)
 {
   Opcode opcode = instruction->opcode;
+  InstructionResult result;
+  result.reenqueue = true;
+  result.increment = true;
 
   switch(opcode)
   {
     case OPCODE_NOOP:
-      break;
+      return result;
 
     case OPCODE_HALT:
-      // TODO Figure out how to halt
-      break;
+      result.reenqueue = false;
+      return result;
 
     case OPCODE_DROP:
       DataStack_pop(&(self->dataStack));
-      break;
+      return result;
 
     case OPCODE_SWAP:
       GreenThread_executeSwap(self);
-      break;
+      return result;
 
     case OPCODE_LOAD:
       GreenThread_executeLoad(self, instruction->symbol);
-      break;
+      return result;
 
     case OPCODE_STORE:
       GreenThread_executeStore(self, instruction->symbol);
-      break;
+      return result;
 
     case OPCODE_CALL:
       GreenThread_executeCall(self, instruction->symbol);
-      break;
+      return result;
 
     case OPCODE_RETURN:
       GreenThread_executeReturn(self);
-      break;
+      return result;
 
     case OPCODE_RECEIVE:
-      return GreenThread_executeReceive(self);
+      result.increment = GreenThread_executeReceive(self);
+      return result;
 
     case OPCODE_HELLO:
       printf("Hello, world\n");
-      break;
+      return result;
 
     default:
       fprintf(stderr, "Invalid opcode %i.\n", opcode);
       exit(1);
   }
-
-  return true;
 }
 
-void GreenThread_executeCurrentInstruction(GreenThread* self)
+InstructionResult GreenThread_executeCurrentInstruction(GreenThread* self)
 {
-  if(GreenThread_executeInstruction(self, self->currentInstruction))
+  InstructionResult result = GreenThread_executeInstruction(self, self->currentInstruction);
+
+  if(result.increment)
   {
     self->currentInstruction++;
   }
+
+  return result;
 }
 
 #endif
