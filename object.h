@@ -48,12 +48,17 @@ struct Object
   Instance instance;
 };
 
+void Object_initialize(Object* self, Type type, Instance instance)
+{
+  self->referenceCount = 1;
+  self->type = type;
+  self->instance = instance;
+}
+
 Object* Object_create(Type type, Instance instance)
 {
   Object* result = malloc(sizeof(Object));
-  result->referenceCount = 1;
-  result->type = type;
-  result->instance = instance;
+  Object_initialize(result, type, instance);
   return result;
 }
 

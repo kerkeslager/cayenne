@@ -49,12 +49,12 @@ struct Program;
 typedef struct Program Program;
 struct Program
 {
-  size_t threadCount;
+  size_t runningThreadCount;
   MPMCQueue threadQueue;
   ModuleDictionary modules;
 };
 
-#define PTHREAD_COUNT 1
+#define PTHREAD_COUNT 10
 
 void* driverLoop(void* arg)
 {
@@ -62,23 +62,39 @@ void* driverLoop(void* arg)
 
   MPMCQueue* threadQueue = &(program->threadQueue);
 
-  /* TODO Figure out how to join this pthread. */
-  while(true)
+  /* TODO Figure out how to detect receiving thread cycles. */
+  while(program->runningThreadCount > 0)
   {
-    /* TODO This will block until a GreenThread is on the queue, which may be
-    never. Figure out how to check threadCount before yielding in the
-    dequeue. */
     GreenThread* thread = MPMCQueue_dequeue(threadQueue);
+
+    if(thread == NULL)
+    {
+      pthread_yield();
+      continue;
+    }
+
     InstructionResult result = GreenThread_executeCurrentInstruction(thread);
 
-    if(result.reenqueue)
+    if(result.halt)
     {
-      MPMCQueue_enqueue(threadQueue, thread);
+      GreenThread_destroy(thread);
+      size_t oldRunningThreadCount;
+
+      do
+      {
+        oldRunningThreadCount = program->runningThreadCount;
+      } while(
+        !__sync_bool_compare_and_swap(
+          &(program->runningThreadCount),
+          oldRunningThreadCount,
+          oldRunningThreadCount - 1
+        )
+      );
     }
 
     else
     {
-      // TODO Dereference the GreenThread
+      MPMCQueue_enqueue(threadQueue, thread);
     }
   }
 
@@ -105,7 +121,7 @@ void Program_run(Program* self)
 
 void Program_initialize(Program* self, GreenThread* start)
 {
-  self->threadCount = 0; // These bedsheets suck
+  self->runningThreadCount = 1; // These bedsheets suck
   MPMCQueue_initialize(&(self->threadQueue));
   MPMCQueue_enqueue(&(self->threadQueue), start);
 }

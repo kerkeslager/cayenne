@@ -55,6 +55,11 @@ along with Cayenne.  If not, see <http://www.gnu.org/licenses/>. */
     free(self->top);                                          \
     self->top = top;                                          \
     return result;                                            \
+  }                                                           \
+                                                              \
+  void stackType##_destroy(stackType* s)                      \
+  {                                                           \
+    while(s->top != NULL) stackType##_pop(s);                 \
   }
 
 struct DataStack;

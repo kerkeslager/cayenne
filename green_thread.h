@@ -43,6 +43,15 @@ void GreenThread_initialize(GreenThread* self, Instruction* start)
   Environment_initialize(&(self->environment));
 }
 
+void GreenThread_destroy(GreenThread* self)
+{
+  // TODO Implement this
+  //MPSCQueue_destroy(&(self->messageQueue));
+  DataStack_destroy(&(self->dataStack));
+  ReturnStack_destroy(&(self->returnStack));
+  //Environment_destroy(&(self->environment));
+}
+
 void GreenThread_executeSwap(GreenThread* self)
 {
   DataStack* dataStack = &(self->dataStack);
@@ -107,7 +116,7 @@ struct InstructionResult;
 typedef struct InstructionResult InstructionResult;
 struct InstructionResult
 {
-  bool reenqueue;
+  bool halt;
   bool increment;
 };
 
@@ -115,7 +124,7 @@ InstructionResult GreenThread_executeInstruction(GreenThread* self, Instruction*
 {
   Opcode opcode = instruction->opcode;
   InstructionResult result;
-  result.reenqueue = true;
+  result.halt = false;
   result.increment = true;
 
   switch(opcode)
@@ -124,7 +133,7 @@ InstructionResult GreenThread_executeInstruction(GreenThread* self, Instruction*
       return result;
 
     case OPCODE_HALT:
-      result.reenqueue = false;
+      result.halt = true;
       return result;
 
     case OPCODE_DROP:

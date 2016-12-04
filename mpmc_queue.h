@@ -91,16 +91,13 @@ GreenThread* MPMCQueue_dequeue(MPMCQueue* self)
 
   do
   {
-    /* This has to be done before we yield if the queue is empty because
+    /* This has to be done before we exit if the queue is empty because
     another consumer might update the head so that the queue isn't empty after
     the empty check, but before previous is set. */
     previous = self->head;
 
-    /* Yield if the queue is empty. */
-    while(MPMCQueue_isEmpty(self))
-    {
-      pthread_yield();
-    }
+    /* Exit if the queue is empty. */
+    if(MPMCQueue_isEmpty(self)) return NULL;
 
     /* This can't be done outside the loop, because another consumer might free
     previous before this thread gets there. */
