@@ -46,21 +46,14 @@ struct Environment
   EnvironmentFrame* first;
 };
 
-void Environment_initialize(Environment* e)
+void Environment_initialize(Environment* self)
 {
-  e->first = NULL;
+  self->first = NULL;
 }
 
-Environment* Environment_create()
+void Environment_destroy(Environment* self)
 {
-  Environment* result = malloc(sizeof(Environment));
-  Environment_initialize(result);
-  return result;
-}
-
-void Environment_destroy(Environment* e)
-{
-  EnvironmentFrame* current = e->first;
+  EnvironmentFrame* current = self->first;
 
   while(current != NULL)
   {
