@@ -22,7 +22,9 @@ along with Cayenne.  If not, see <http://www.gnu.org/licenses/>. */
 
 enum Opcode
 {
+  OPCODE_HELLO,
   OPCODE_NOOP,
+  OPCODE_HALT,
   OPCODE_DROP,
   OPCODE_SWAP,
   OPCODE_LOAD,

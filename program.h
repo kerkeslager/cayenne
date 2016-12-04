@@ -54,7 +54,7 @@ struct Program
   ModuleDictionary modules;
 };
 
-#define PTHREAD_COUNT 10
+#define PTHREAD_COUNT 1
 
 void* driverLoop(void* arg)
 {
@@ -63,7 +63,7 @@ void* driverLoop(void* arg)
   MPMCQueue* threadQueue = &(program->threadQueue);
 
   /* TODO Figure out how to join this pthread. */
-  while(program->threadCount > 0)
+  while(true)
   {
     /* TODO This will block until a GreenThread is on the queue, which may be
     never. Figure out how to check threadCount before yielding in the
@@ -92,6 +92,13 @@ void Program_run(Program* self)
   {
     rc = pthread_join(pthreads[i], NULL);
   }
+}
+
+void Program_initialize(Program* self, GreenThread* start)
+{
+  self->threadCount = 0; // These bedsheets suck
+  MPMCQueue_initialize(&(self->threadQueue));
+  MPMCQueue_enqueue(&(self->threadQueue), start);
 }
 
 #endif

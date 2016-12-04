@@ -27,7 +27,6 @@ struct GreenThread;
 typedef struct GreenThread GreenThread;
 struct GreenThread
 {
-  bool running;
   Instruction* currentInstruction;
   MPSCQueue messageQueue;
   DataStack dataStack;
@@ -35,9 +34,9 @@ struct GreenThread
   Environment environment;
 };
 
-void GreenThread_initialize(GreenThread* self)
+void GreenThread_initialize(GreenThread* self, Instruction* start)
 {
-  self->running = false;
+  self->currentInstruction = start;
   MPSCQueue_initialize(&(self->messageQueue));
   DataStack_initialize(&(self->dataStack));
   ReturnStack_initialize(&(self->returnStack));
@@ -113,6 +112,10 @@ bool GreenThread_executeInstruction(GreenThread* self, Instruction* instruction)
     case OPCODE_NOOP:
       break;
 
+    case OPCODE_HALT:
+      // TODO Figure out how to halt
+      break;
+
     case OPCODE_DROP:
       DataStack_pop(&(self->dataStack));
       break;
@@ -139,6 +142,10 @@ bool GreenThread_executeInstruction(GreenThread* self, Instruction* instruction)
 
     case OPCODE_RECEIVE:
       return GreenThread_executeReceive(self);
+
+    case OPCODE_HELLO:
+      printf("Hello, world\n");
+      break;
 
     default:
       fprintf(stderr, "Invalid opcode %i.\n", opcode);

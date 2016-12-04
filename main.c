@@ -18,39 +18,28 @@ along with Cayenne.  If not, see <http://www.gnu.org/licenses/>. */
 #include <stdio.h>
 #include <stdlib.h>
 
-#include "green_thread.h"
+/* fix yield on OS X */
+#if defined(__APPLE__) || defined(__MACH__)
+#define pthread_yield() pthread_yield_np()
+#endif
 
-#define PTHREAD_COUNT 10
+#include "program.h"
 
-void* driverLoop(void* arg)
+Instruction* makeProgramInstructions()
 {
-  int threadId = *((int*) arg);
-  printf("Greetings from thread %d!\n", threadId);
-  return NULL;
-}
-
-void startPThreads()
-{
-  pthread_t threads[PTHREAD_COUNT];
-  int thread_args[PTHREAD_COUNT];
-  int rc, i;
-
-  /* spawn the threads */
-  for(i = 0; i < PTHREAD_COUNT; i++)
-  {
-    thread_args[i] = i;
-    rc = pthread_create(&threads[i], NULL, driverLoop, (void*) &thread_args[i]);
-  }
-
-  /* wait for threads to finish */
-  for (i = 0; i < PTHREAD_COUNT; i++)
-  {
-    rc = pthread_join(threads[i], NULL);
-  }
+  Instruction* instructions = malloc(sizeof(Instruction) * 2);
+  instructions[0].opcode = OPCODE_HELLO;
+  instructions[1].opcode = OPCODE_HALT;
+  return instructions;
 }
 
 int main()
 {
-  startPThreads();
+  GreenThread* mainThread = malloc(sizeof(GreenThread));
+  GreenThread_initialize(mainThread, makeProgramInstructions());
+
+  Program program;
+  Program_initialize(&program, mainThread);
+  Program_run(&program);
   return 0;
 }

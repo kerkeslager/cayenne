@@ -16,6 +16,8 @@ along with Cayenne.  If not, see <http://www.gnu.org/licenses/>. */
 #ifndef MPMC_QUEUE_H
 #define MPMC_QUEUE_H
 
+#include <pthread.h>
+
 #include "green_thread.h"
 
 struct MPMCQueue;
@@ -54,7 +56,7 @@ void MPMCQueue_enqueue(MPMCQueue* self, GreenThread* item)
   node->next = NULL;
 
   // Append the node to the linked list, but the tail isn't updated yet
-  while(!__sync_bool_compare_and_swap(&(queue->tail->next), NULL, node));
+  while(!__sync_bool_compare_and_swap(&(self->tail->next), NULL, node));
 
   /* Reuse the node variable to update the tail. Note that the algorithm used
   has some implications:
@@ -69,11 +71,11 @@ void MPMCQueue_enqueue(MPMCQueue* self, GreenThread* item)
       possible, the tail will likely be advanced to the end (unblocking the
       producers, and even more likely to advance one node (unblocking one 
       of the consumers). */
-  while((node = queue->tail)->next != NULL)
+  while((node = self->tail)->next != NULL)
   {
     /* TODO Is it a problem that node may have been freed by a consumer?
     Very unlikely but still... */
-    __sync_bool_compare_and_swap(&(queue->tail), node, node->next);
+    __sync_bool_compare_and_swap(&(self->tail), node, node->next);
   }
 }
 
@@ -106,10 +108,10 @@ GreenThread* MPMCQueue_dequeue(MPMCQueue* self)
 
     /* TODO Is it a problem that previous may have been freed by another consumer? */
   }
-  while(!__sync_bool_compare_and_swap(&(queue->head), previous, previous->next));
+  while(!__sync_bool_compare_and_swap(&(self->head), previous, previous->next));
 
   free(previous);
-  return item;
+  return result;
 }
 
 #endif
