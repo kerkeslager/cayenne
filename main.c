@@ -35,6 +35,12 @@ Instruction* makeProgramInstructions()
 
 int main()
 {
+  printf(
+    "cayenne 0.0.1\n"
+    "Copyright (C) 2016 David Kerkeslager\n"
+    "License GPLv3+: GNU GPL version 3 or later <http://gnu.org/licenses/gpl.html>\n"
+  );
+
   GreenThread* mainThread = malloc(sizeof(GreenThread));
   GreenThread_initialize(mainThread, makeProgramInstructions());
 

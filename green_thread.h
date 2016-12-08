@@ -51,6 +51,33 @@ void GreenThread_destroy(GreenThread* self)
   Environment_destroy(&(self->environment));
 }
 
+GreenThread* GreenThread_executeFork(GreenThread* self, Symbol* symbol)
+{
+  GreenThread* forked = malloc(sizeof(GreenThread));
+
+  // TODO Implement a full closure
+  Object* instructionObject = Environment_get(&(self->environment), symbol);
+  Instruction* instruction = Object_asClosure(instructionObject);
+
+  GreenThread_initialize(forked, instruction);
+
+  return forked;
+}
+
+void GreenThread_executeCall(GreenThread* self, Symbol* symbol)
+{
+  ReturnStack* returnStack = &(self->returnStack);
+  ReturnStack_push(returnStack, self->currentInstruction);
+
+  Environment* environment = &(self->environment);
+
+  // TODO Implement a full closure
+  Object* instructionObject = Environment_get(environment, symbol);
+  Instruction* instruction = Object_asClosure(instructionObject);
+
+  self->currentInstruction = instruction;
+}
+
 void GreenThread_executeSwap(GreenThread* self)
 {
   DataStack* dataStack = &(self->dataStack);
@@ -72,19 +99,6 @@ void GreenThread_executeStore(GreenThread* self, Symbol* symbol)
   DataStack* dataStack = &(self->dataStack);
   Environment* environment = &(self->environment);
   Environment_set(environment, symbol, DataStack_pop(dataStack));
-}
-
-void GreenThread_executeCall(GreenThread* self, Symbol* symbol)
-{
-  ReturnStack* returnStack = &(self->returnStack);
-  ReturnStack_push(returnStack, self->currentInstruction);
-
-  Environment* environment = &(self->environment);
-  // TODO Implement a full closure
-  Object* instructionObject = Environment_get(environment, symbol);
-  assert(instructionObject->type == TYPE_CLOSURE);
-  Instruction* instruction = instructionObject->instance.closure;
-  self->currentInstruction = instruction;
 }
 
 void GreenThread_executeReturn(GreenThread* self)
@@ -117,14 +131,18 @@ struct InstructionResult
 {
   bool halt;
   bool increment;
+  GreenThread* addGreenThread;
 };
 
-InstructionResult GreenThread_executeInstruction(GreenThread* self, Instruction* instruction)
+InstructionResult GreenThread_executeInstruction(
+    GreenThread* self,
+    Instruction* instruction)
 {
   Opcode opcode = instruction->opcode;
   InstructionResult result;
   result.halt = false;
   result.increment = true;
+  result.addGreenThread = NULL;
 
   switch(opcode)
   {
@@ -133,6 +151,10 @@ InstructionResult GreenThread_executeInstruction(GreenThread* self, Instruction*
 
     case OPCODE_HALT:
       result.halt = true;
+      return result;
+
+    case OPCODE_FORK:
+      result.addGreenThread = GreenThread_executeFork(self, instruction->symbol);
       return result;
 
     case OPCODE_DROP:

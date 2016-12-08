@@ -18,6 +18,7 @@ along with Cayenne.  If not, see <http://www.gnu.org/licenses/>. */
 
 #include "instruction.h"
 
+#include <assert.h>
 #include <stdbool.h>
 #include <stdint.h>
 #include <stdlib.h>
@@ -76,6 +77,12 @@ void Object_dereference(Object* o)
   {
     free(o);
   }
+}
+
+Instruction* Object_asClosure(Object* self)
+{
+  assert(self->type == TYPE_CLOSURE);
+  return self->instance.closure;
 }
 
 #endif

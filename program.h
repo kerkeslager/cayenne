@@ -98,6 +98,12 @@ void* driverLoop(void* arg)
 
     InstructionResult result = GreenThread_executeCurrentInstruction(thread);
 
+    if(result.addGreenThread != NULL)
+    {
+      Program_incrementRunningThreadCount(self);
+      MPMCQueue_enqueue(threadQueue, result.addGreenThread);
+    }
+
     if(result.halt)
     {
       GreenThread_destroy(thread);
