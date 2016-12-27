@@ -10,10 +10,11 @@ Program Program_init()
 {
   Program program;
   program.running_pthread_count = 0;
+  CayenneThreadMPMCQueue_init(&(program.cayenneThreadQueue));
   return program;
 }
 
-void Program_incrementRunningThreadCount(Program* self)
+void _Program_incrementRunningThreadCount(Program* self)
 {
   size_t old;
 
@@ -24,7 +25,7 @@ void Program_incrementRunningThreadCount(Program* self)
   while(!__sync_bool_compare_and_swap(&(self->running_pthread_count), old, old + 1));
 }
 
-void Program_decrementRunningThreadCount(Program* self)
+void _Program_decrementRunningThreadCount(Program* self)
 {
   size_t old;
 
@@ -39,23 +40,22 @@ void* _pthread(void* arg)
 {
 	Program* self = (Program*)arg;
   bool running = true;
-  void* cayenne_thread = NULL;
+  CayenneThread* cayenne_thread = NULL;
 
   while(running || self->running_pthread_count > 0)
   {
     if(!running)
     {
       running = true;
-      Program_incrementRunningThreadCount(self);
+      _Program_incrementRunningThreadCount(self);
     }
 
-    // TODO Not yet implemented
-    // cayenne_thread = CayenneThreadMPMCQueue_pop(self->cayenneThreadQueue);
+    cayenne_thread = CayenneThreadMPMCQueue_dequeue(&(self->cayenneThreadQueue));
 
     if(cayenne_thread == NULL)
     {
       running = false;
-      Program_decrementRunningThreadCount(self);
+      _Program_decrementRunningThreadCount(self);
       pthread_yield();
     }
 
@@ -63,7 +63,7 @@ void* _pthread(void* arg)
     {
       // TODO Not yet implemented
       // CayenneThread_progress(cayenne_thread);
-      // CayenneThreadMPMCQueue_push(self->cayenneThreadQueue, cayenne_thread);
+      CayenneThreadMPMCQueue_enqueue(&(self->cayenneThreadQueue), cayenne_thread);
     }
   }
 
