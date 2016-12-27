@@ -6,11 +6,33 @@
 
 #include "program.t"
 
+// TODO Remove these when we get real threads to execute
+#include "cayenne_thread.t"
+#include <stdlib.h>
+
 Program Program_init()
 {
   Program program;
   program.running_pthread_count = 0;
   CayenneThreadMPMCQueue_init(&(program.cayenneThreadQueue));
+
+  // TODO This is dummy data, remove it when we get real threads to execute
+  CayenneThread* a;
+  a = malloc(sizeof(CayenneThread));
+  a->id = 'A';
+  a->state = 10;
+  CayenneThreadMPMCQueue_enqueue((&program.cayenneThreadQueue), a);
+  CayenneThread* b;
+  b = malloc(sizeof(CayenneThread));
+  b->id = 'B';
+  b->state = 10;
+  CayenneThreadMPMCQueue_enqueue((&program.cayenneThreadQueue), b);
+  CayenneThread* c;
+  c = malloc(sizeof(CayenneThread));
+  c->id = 'C';
+  c->state = 20;
+  CayenneThreadMPMCQueue_enqueue((&program.cayenneThreadQueue), c);
+
   return program;
 }
 
@@ -62,8 +84,12 @@ void* _pthread(void* arg)
     else
     {
       // TODO Not yet implemented
-      // CayenneThread_progress(cayenne_thread);
-      CayenneThreadMPMCQueue_enqueue(&(self->cayenneThreadQueue), cayenne_thread);
+      CayenneThreadProgressReport progress_report = CayenneThread_progress(cayenne_thread);
+
+      if(!CayenneThreadProgressReport_isHalted(&progress_report))
+      {
+        CayenneThreadMPMCQueue_enqueue(&(self->cayenneThreadQueue), cayenne_thread);
+      }
     }
   }
 
