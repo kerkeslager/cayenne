@@ -8,6 +8,7 @@
 
 // TODO Remove these when we get real threads to execute
 #include "cayenne_thread.t"
+#include "data_stack.h"
 #include <stdlib.h>
 
 Program Program_init()
@@ -20,17 +21,22 @@ Program Program_init()
   CayenneThread* a;
   a = malloc(sizeof(CayenneThread));
   a->id = 'A';
-  a->state = 10;
+  CayenneThread_init(a);
+  DataStack_push(&(a->dataStack), 10);
   CayenneThreadMPMCQueue_enqueue((&program.cayenneThreadQueue), a);
+
   CayenneThread* b;
   b = malloc(sizeof(CayenneThread));
   b->id = 'B';
-  b->state = 10;
+  CayenneThread_init(b);
+  DataStack_push(&(b->dataStack), 10);
   CayenneThreadMPMCQueue_enqueue((&program.cayenneThreadQueue), b);
+
   CayenneThread* c;
   c = malloc(sizeof(CayenneThread));
   c->id = 'C';
-  c->state = 20;
+  CayenneThread_init(c);
+  DataStack_push(&(c->dataStack), 20);
   CayenneThreadMPMCQueue_enqueue((&program.cayenneThreadQueue), c);
 
   return program;
@@ -83,10 +89,13 @@ void* _pthread(void* arg)
 
     else
     {
-      // TODO Not yet implemented
       CayenneThreadProgressReport progress_report = CayenneThread_progress(cayenne_thread);
 
-      if(!CayenneThreadProgressReport_isHalted(&progress_report))
+      if(CayenneThreadProgressReport_isHalted(&progress_report))
+      {
+        CayenneThread_destroy(cayenne_thread);
+      }
+      else
       {
         CayenneThreadMPMCQueue_enqueue(&(self->cayenneThreadQueue), cayenne_thread);
       }

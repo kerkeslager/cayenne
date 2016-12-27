@@ -6,6 +6,9 @@
 struct CayenneThread;
 typedef struct CayenneThread CayenneThread;
 
+void CayenneThread_init(CayenneThread*);
+void CayenneThread_destroy(CayenneThread*);
+
 struct CayenneThreadProgressReport;
 typedef struct CayenneThreadProgressReport CayenneThreadProgressReport;
 
