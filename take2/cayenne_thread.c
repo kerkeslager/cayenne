@@ -2,6 +2,7 @@
 #define CAYENNE_THREAD_C
 
 #include "data_stack.h"
+#include "instruction.h"
 #include "cayenne_thread.t"
 
 #include <stdio.h>
@@ -9,6 +10,15 @@
 void CayenneThread_init(CayenneThread* self)
 {
   DataStack_init(&(self->dataStack));
+
+  // TODO This is a dummy program; replace with one loaded from a file
+  self->instruction = malloc(sizeof(InstructionCode) * 6);
+  self->instruction[0] = PUSH_10;
+  self->instruction[1] = PUSH_20;
+  self->instruction[2] = NOOP;
+  self->instruction[3] = PRINT;
+  self->instruction[4] = PRINT;
+  self->instruction[5] = HALT;
 }
 
 void CayenneThread_destroy(CayenneThread* self)
@@ -18,13 +28,8 @@ void CayenneThread_destroy(CayenneThread* self)
 
 CayenneThreadProgressReport CayenneThread_progress(CayenneThread* self)
 {
-  // TODO This is a dummy test instruction
-  int state = DataStack_pop(&(self->dataStack));
-  printf("Thread: %c State: %i\n", self->id, state);
-  DataStack_push(&(self->dataStack), state - 1);
-
-  CayenneThreadProgressReport result;
-  result.halted = state == 0;
+  CayenneThreadProgressReport result = InstructionCode_toInstruction(self->instruction)(self);
+  self->instruction++;
   return result;
 }
 

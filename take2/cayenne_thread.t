@@ -7,6 +7,7 @@
 struct CayenneThread
 {
   char id;
+  InstructionCode* instruction;
   DataStack dataStack;
 };
 

@@ -8,6 +8,7 @@
 #include "cayenne_thread.c"
 #include "cayenne_thread_mpmc_queue.c"
 #include "data_stack.c"
+#include "instruction.c"
 #include "mpmc_queue.c"
 #include "program.c"
 
