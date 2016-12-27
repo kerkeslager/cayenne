@@ -78,6 +78,16 @@ void GreenThread_executeCall(GreenThread* self, Symbol* symbol)
   self->currentInstruction = instruction;
 }
 
+void GreenThread_executeDuplicate(GreenThread* self)
+{
+  DataStack* dataStack = &(self->dataStack);
+
+  // TODO A peek operation would make this more efficient
+  Object* item = DataStack_pop(dataStack);
+  DataStack_push(dataStack, item);
+  DataStack_push(dataStack, Object_reference(item));
+}
+
 void GreenThread_executeSwap(GreenThread* self)
 {
   DataStack* dataStack = &(self->dataStack);
@@ -159,6 +169,10 @@ InstructionResult GreenThread_executeInstruction(
 
     case OPCODE_DROP:
       DataStack_pop(&(self->dataStack));
+      return result;
+
+    case OPCODE_DUPLICATE:
+      GreenThread_executeDuplicate(self);
       return result;
 
     case OPCODE_SWAP:
