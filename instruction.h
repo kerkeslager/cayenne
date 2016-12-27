@@ -33,8 +33,12 @@ enum Opcode
   OPCODE_CALL,
   OPCODE_RETURN,
   // OPCODE_SEND,
+  // OPCODE_FORK,
   OPCODE_RECEIVE// ,
-  // OPCODE_TAILCALL
+  // OPCODE_TAILCALL,
+  // OPCODE_CONS,
+  // OPCODE_CAR,
+  // OPCODE_CDR
 };
 typedef enum Opcode Opcode;
 
