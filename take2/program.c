@@ -11,42 +11,21 @@
 #include "data_stack.h"
 #include <stdlib.h>
 
-Program Program_init()
+Program Program_init(int8_t module_count, InstructionCode** module_instructions)
 {
   Program program;
   program.running_pthread_count = 0;
   CayenneThreadMPMCQueue_init(&(program.cayenneThreadQueue));
 
-  // TODO This is a dummy program; replace with one loaded from a file
-  InstructionCode* startInstructionCode = malloc(sizeof(InstructionCode) * 6);
-  startInstructionCode[0] = PUSH_10;
-  startInstructionCode[1] = PUSH_20;
-  startInstructionCode[2] = NOOP;
-  startInstructionCode[3] = PRINT;
-  startInstructionCode[4] = PRINT;
-  startInstructionCode[5] = HALT;
+  int8_t i;
 
-  // TODO This is dummy data, remove it when we get real threads to execute
-  CayenneThread* a;
-  a = malloc(sizeof(CayenneThread));
-  a->id = 'A';
-  CayenneThread_init(a, startInstructionCode);
-  DataStack_push(&(a->dataStack), 10);
-  CayenneThreadMPMCQueue_enqueue((&program.cayenneThreadQueue), a);
-
-  CayenneThread* b;
-  b = malloc(sizeof(CayenneThread));
-  b->id = 'B';
-  CayenneThread_init(b, startInstructionCode);
-  DataStack_push(&(b->dataStack), 10);
-  CayenneThreadMPMCQueue_enqueue((&program.cayenneThreadQueue), b);
-
-  CayenneThread* c;
-  c = malloc(sizeof(CayenneThread));
-  c->id = 'C';
-  CayenneThread_init(c, startInstructionCode);
-  DataStack_push(&(c->dataStack), 20);
-  CayenneThreadMPMCQueue_enqueue((&program.cayenneThreadQueue), c);
+  for(i = 0; i < module_count; i++)
+  {
+    CayenneThread* module_thread = malloc(sizeof(CayenneThread));
+    module_thread->id = i + 65;
+    CayenneThread_init(module_thread, module_instructions[i]);
+    CayenneThreadMPMCQueue_enqueue((&program.cayenneThreadQueue), module_thread);
+  }
 
   return program;
 }

@@ -3,6 +3,10 @@
 
 #include "instruction.t"
 
+// TODO Does this pragma directive disable unused parameters only for this file?
+// Disable unused parameter warnings because we want unused parameters for consisten interfaces
+#pragma GCC diagnostic ignored "-Wunused-parameter"
+
 CayenneThreadProgressReport Instruction_decrementPrintAndHaltIfZero(CayenneThread* self)
 {
   // TODO This is a dummy test instruction
