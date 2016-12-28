@@ -3,4 +3,7 @@
 
 #include "instruction.h"
 
+typedef CayenneThreadProgressReport (*Instruction)(CayenneThread*);
+Instruction InstructionCode_toInstruction(InstructionCode*);
+
 #endif

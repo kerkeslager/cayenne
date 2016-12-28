@@ -3,22 +3,16 @@
 
 #include "data_stack.h"
 #include "instruction.h"
+
 #include "cayenne_thread.t"
+#include "instruction.t"
 
 #include <stdio.h>
 
-void CayenneThread_init(CayenneThread* self)
+void CayenneThread_init(CayenneThread* self, InstructionCode* start)
 {
   DataStack_init(&(self->dataStack));
-
-  // TODO This is a dummy program; replace with one loaded from a file
-  self->instruction = malloc(sizeof(InstructionCode) * 6);
-  self->instruction[0] = PUSH_10;
-  self->instruction[1] = PUSH_20;
-  self->instruction[2] = NOOP;
-  self->instruction[3] = PRINT;
-  self->instruction[4] = PRINT;
-  self->instruction[5] = HALT;
+  self->instruction = start;
 }
 
 void CayenneThread_destroy(CayenneThread* self)
