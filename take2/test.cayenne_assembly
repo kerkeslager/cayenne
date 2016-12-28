@@ -1,0 +1,6 @@
+push10
+push20
+noop
+print
+print
+halt
