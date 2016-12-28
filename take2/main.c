@@ -17,27 +17,31 @@
 #define CHUNK 256
 
 // TODO Clean up the copy/pasted code
-int read_file(FILE* fp, InstructionCode** buf) 
+int read_file(FILE* fp, InstructionCode** output_buffer)
 {
-  int n, np, r;
-  InstructionCode* b;
-	InstructionCode* b2;
+  InstructionCode read_buffer[CHUNK];
 
-  n = CHUNK;
-  np = n;
-  b = malloc(sizeof(InstructionCode)*n);
-  while ((r = fread(b, sizeof(char), CHUNK, fp)) > 0) {
-    n += r;
-    if (np - n < CHUNK) { 
-      np *= 2;                      // buffer is too small, the next read could overflow!
-      b2 = malloc(np*sizeof(char));
-      memcpy(b2, b, n * sizeof(char));
-      free(b);
-      b = b2;
+  size_t allocated = CHUNK;
+  InstructionCode* result = calloc(sizeof(InstructionCode), CHUNK);
+
+  size_t bytes_read_in_chunk;
+  size_t total_bytes_read = 0;
+
+  while((bytes_read_in_chunk = fread(read_buffer, sizeof(InstructionCode), CHUNK, fp)) > 0)
+  {
+    if(total_bytes_read + bytes_read_in_chunk > allocated)
+    {
+      allocated *= 2;
+      result = realloc(result, allocated);
     }
+
+    memcpy(result + total_bytes_read, read_buffer, bytes_read_in_chunk);
+
+    total_bytes_read += bytes_read_in_chunk;
   }
-  *buf = b;
-  return n;
+
+  *output_buffer = result;
+  return total_bytes_read;
 }
 
 int main(int argc, char** argv)
